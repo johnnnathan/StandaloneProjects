@@ -10,10 +10,12 @@ class BoardFrame extends JFrame{
     public static BoardPanel boardPanel = new BoardPanel();
 
     public static void main(String[] args) throws InterruptedException {
-        frame.setSize(400,400);
+        frame.setPreferredSize(new Dimension(800,800));
         frame.setResizable(true);
+        frame.setBackground(Color.BLACK);
         frame.setTitle("Falling Sand");
         frame.add(boardPanel);
+        frame.pack();
         frame.setLayout(new BorderLayout());
 
         // Add the panel to the frame, specifying BorderLayout.CENTER
@@ -28,7 +30,7 @@ class BoardFrame extends JFrame{
                 while (true){
                     boardPanel.SandLogic();
                     try {
-                        Thread.sleep(50);
+                        Thread.sleep(25);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -60,7 +62,12 @@ class BoardPanel extends JPanel{
                 Y = e.getY();
                 int positionX = X/pixelSize;
                 int positionY = Y/pixelSize;
-                board[positionX][positionY] = true;
+
+                for (int i = positionX - 1; i <= positionX + 1; i++){
+                    for (int j = positionY - 1; j <= positionY + 1; j++){
+                        board[i][j] = true;
+                    }
+                }
                 repaint();
             }
             @Override
@@ -89,7 +96,7 @@ class BoardPanel extends JPanel{
                     g.setColor(color);
                     g.fillRect(i*pixelSize,j*pixelSize,pixelSize,pixelSize);
                 } else {
-                    g.setColor(Color.WHITE);
+                    g.setColor(Color.BLUE);
                     g.fillRect(i*pixelSize,j*pixelSize,pixelSize,pixelSize);
                 }
             }
@@ -107,11 +114,11 @@ class BoardPanel extends JPanel{
                     if (board[i][j] == true){
 
                         if (board[i][j+1]== false){board[i][j] = false; board[i][j+1] = true;}
-                        else if (board[i-1][j+2] == false || board[i+1][j+2] == false) {
-                            if (board[i-1][j+2] == false && board[i+1][j+2] == true){
+                        else if (board[i-1][j+1] == false || board[i+1][j+1] == false) {
+                            if (board[i-1][j+1] == false && board[i+1][j+1] == true){
                                 board[i][j] = false;
                                 board[i-1][j] = true;
-                            } else if (board[i-1][j+2] == true && board[i+1][j+2] == false) {
+                            } else if (board[i-1][j+1] == true && board[i+1][j+1] == false) {
                                 board[i][j] = false;
                                 board[i+1][j] = true;
                             }
