@@ -7,12 +7,12 @@ class chess {
     }
 }
 abstract class Piece {
-    private byte locx, locy, modx, mody;
+    private int locx, locy, modx, mody;
     private boolean color;//this should be true for white and false for black
-    private byte[21] 
-    public static ID = 0;
-    private static pieceID;
-    public Piece(byte locx, byte locy,char rank, boolean color){
+    private char rank;
+    public static int ID = 0;
+    private static int pieceID;
+    public Piece(int locx, int locy,char rank, boolean color){
         this.locx = locx;
         this.locy = locy;
         this.rank = rank;
@@ -23,93 +23,148 @@ abstract class Piece {
         else {this.modx = -1; this.mody = 1;}
     }
 
-    public byte getID(){return pieceID;}
-    public byte getX(){return locx;}
-    public byte getY(){return locy;}
-    public byte getXY(){return (locx*10)+locy}
+    public int getID(){return pieceID;}
+    public int getX(){return locx;}
+    public int getY(){return locy;}
 
-    abstract public ArrayList<byte> getMoves();
+    public int getModx() {return modx;}
+
+    public int getMody() {return mody;}
+
+    public int getXY(){return (locx*1000)+locy;}
+    public char getOpponent(){
+        if (color){return 'B';}
+        else{return 'W';}
+    }
+    abstract public ArrayList<Integer> getMoves();
     
 }
 
 class Pawn extends Piece{
-    public Pawn(byte locx, byte locy, boolean color){
+    private boolean firstMove = true;
+    public Pawn(int locx, int locy, boolean color){
         super(locx,locy,"P", color);
     }
-    public getMoves(){
-        ArrayList<byte> moves = new ArrayList<>();
-        if (/*no entity in first or second position if first move*/){/*move*/}
+    public ArrayList<Integer> getMoves(){
+        ArrayList<Integer> moves = new ArrayList<>();
+        
+        if (!Board.occupiedByParty(this.getX(), this.getY() + (1*this.getModY()), 'A'))    {moves.add(Board.quickFormat(this.getX,this.getY + (1*this.getModY)));}
+        
+        if (!Board.occupiedByParty(this.getX(), this.getY() + (2*this.getModY()), 'A')&&firstMove){moves.add(Board.quickFormat(this.getX,this.getY + (2*this.getModY)));}
+        
+        if (!Board.occupiedByParty(this.getX() + 1, this.getY() + (1*this.getModY()), getOpponent())) {moves.add(Board.quickFormat(this.getX + 1,this.getY + (this.getModY)));}
+        
+        if (!Board.occupiedByParty(this.getX() - 1, this.getY() + (1*this.getModY()), getOpponent())) {moves.add(Board.quickFormat(this.getX - 1,this.getY + (this.getModY)));}
+
+        return moves;
     }
 
 }
 
 class Knight extends Piece{
-    public Knight(byte locx, byte locy, boolean color){
+    public Knight(int locx, int locy, boolean color){
         super(locx, locy,"N", color);
     }
+    public ArrayList<Integer> getMoves(){
+        ArrayList<Integer> moves = new ArrayList<>();
 
+
+    }
 }
 
 class King extends Piece{
-    public King(byte locx, byte locy, boolean color){
+    public King(int locx, int locy, boolean color){
         super(locx,locy,"K", color);
     }
 
+    public ArrayList<Integer> getMoves(){
+        ArrayList<Integer> moves = new ArrayList<>();
+        for (int i = this.getX-1, i <= this.getX + 1; i++){
+            for (int j = this.getY -1, j <= this.getY + 1; i++){
+                moves.add(Board.quickformat(i,j);
+
+            }
+
+        }
+        return moves;
+
+    }
 }
 class Queen extends Piece{
-    public Queen(byte locx, byte locy, boolean color){
+    public Queen(int locx, int locy, boolean color){
         super(locx,locy,"Q",color);
 
     }
 
+    public ArrayList<Integer> getMoves(){
+        ArrayList<Integer> moves = new ArrayList<>();
+        int y = this.getY();
+        int x = this.getX();  
+        for (int i = 0; i < 8; i++) {
+            moves.add(Board.quickFormat(i,y));
+            moves.add(Board.quickFormat(x,i)); 
+        }
+
+    }
 }
 class Bishop extends Piece{
-    public Bishop(byte locx, byte locy, boolean color){
+    public Bishop(int locx, int locy, boolean color){
         super(locx, locy, "B",color);        
     }
 
+    public ArrayList<Integer> getMoves(){
+        ArrayList<Integer> moves = new ArrayList<>();
+
+
+    }
 
 }
 class Rook extends Piece{
-    public Rook(byte locx, byte locy, boolean color){
+    public Rook(int locx, int locy, boolean color){
         super(locx,locy,"R",color);
+    }
+    public ArrayList<Integer> getMoves(){
+        ArrayList<Integer> moves = new ArrayList<>();
+
+
     }
 }
 
 
 class Board{
-    public static Piece[][] board = new int[8][8];//I don't think this will do anything. Keeping it for possible future use, should delete if not
-    public static byte[] piecePositions = new byte[32];//Keep all current positions of each piece depending on ID. Blacks should be in the back (x>15). And yes, that                                                     is a reference to segregation in america
+    public static Piece[][] board = new Piece[8][8];//I don't think this will do anything. Keeping it for possible future use, should delete if not
+    public static int[] piecePositions = new int[32];//Keep all current positions of each piece depending on ID. Blacks should be in the back (x>15). And yes, that                                                     is a reference to segregation in america
 
-    public static occupyPosition(Piece piece){//assuming that position of piece has been updated in the object
-        piecePosition[piece.getID] = piece.getXY();
+    public static void occupyPosition(Piece piece){//assuming that position of piece has been updated in the object
+        piecePositions[piece.getID()] = piece.getXY();
     }
 
-    public boolean occupiedByParty(byte X, byte Y, char Party/*party should be A for (A)ll, "B" for (B)lack and "W" for (W)hite*/){
-        byte endPosition = quickFormat(X,Y);
-        byte start,end;//end should be one bigger than the position of the final element in order to immediately add it to the loop
+    public static boolean occupiedByParty(int X, int Y, char party/*party should be A for (A)ll, "B" for (B)lack and "W" for (W)hite*/){
+        int endPosition = quickFormat(X,Y);
+        int start =-1;
+        int end = -1;//end should be one bigger than the position of the final element in order to immediately add it to the loop
 
         switch (party) {
-            case "A":
+            case 'A':
                 start = 0;
                 end = 32;
                 break;
-            case "B":
+            case 'B':
                 start = 16;
                 end = 32;
                 break;
-            case "W":
+            case 'W':
                 start = 0;
-                end = 16
+                end = 16;
                 break;
         }
         boolean flag = true;
-        for (byte i = start; i < end; i++){
-            if (piecePositions[i] == endPosition){flag = false;}
+        for (int i = start; i < end; i++){
+            if (piecePositions[i] == endPosition){flag = false;break;}
         }
         return flag;
 
 
     }
-    public quickFormat(byte X, byte Y){return (X*10)+Y;}//this is the same function as getXY from pieces by applying to any coordinates
+    public static int quickFormat(int X, int Y){return (X*1000)+Y;}//this is the same function as getXY from pieces by applying to any coordinates
 }
