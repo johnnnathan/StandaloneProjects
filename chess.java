@@ -26,7 +26,11 @@ abstract class Piece {
     public int getID(){return pieceID;}
     public int getX(){return locx;}
     public int getY(){return locy;}
+    public boolean getColor(){
+        if (color){return 'W';}
+        return 'B';
 
+    }
     public int getModx() {return modx;}
 
     public int getMody() {return mody;}
@@ -34,7 +38,7 @@ abstract class Piece {
     public int getXY(){return (locx*1000)+locy;}
     public char getOpponent(){
         if (color){return 'B';}
-        else{return 'W';}
+        return 'W';
     }
     abstract public ArrayList<Integer> getMoves();
     
@@ -79,12 +83,10 @@ class King extends Piece{
 
     public ArrayList<Integer> getMoves(){
         ArrayList<Integer> moves = new ArrayList<>();
-        for (int i = this.getX-1, i <= this.getX + 1; i++){
-            for (int j = this.getY -1, j <= this.getY + 1; i++){
-                moves.add(Board.quickformat(i,j);
-
+        for (int i = this.getX() - 1, i <= this.getX() + 1; i++){
+            for (int j = this.getY() -1, j <= this.getY() + 1; i++){
+                if (this.getX()!=i && this.getY()!=j && !Board.occupiedByParty(i,j,this.getColor())){moves.add(Board.quickformat(i,j);}
             }
-
         }
         return moves;
 
@@ -96,13 +98,16 @@ class Queen extends Piece{
 
     }
 
-    public ArrayList<Integer> getMoves(){
+    public ArrayList<Integer> getMoves(){//shouldn't go through pieces, shouldn't go outside boundaries
         ArrayList<Integer> moves = new ArrayList<>();
+        boolean[] flags = new boolean[2];
         int y = this.getY();
         int x = this.getX();  
-        for (int i = 0; i < 8; i++) {
-            moves.add(Board.quickFormat(i,y));
-            moves.add(Board.quickFormat(x,i)); 
+        for (int i = 0; i < 7; i++) {
+            for (int j = 0; j < 2; j++){
+                if (!flags[j] && !Board.occupiedByParty(i+x,y,'A')){moves.}
+
+            }
         }
 
     }
@@ -125,7 +130,7 @@ class Rook extends Piece{
     }
     public ArrayList<Integer> getMoves(){
         ArrayList<Integer> moves = new ArrayList<>();
-
+        
 
     }
 }
