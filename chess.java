@@ -26,14 +26,14 @@ abstract class Piece {
     public int getID(){return pieceID;}
     public int getX(){return locx;}
     public int getY(){return locy;}
-    public boolean getColor(){
+    public char getColor(){
         if (color){return 'W';}
         return 'B';
 
     }
-    public int getModx() {return modx;}
+    public int getModX() {return modx;}
 
-    public int getMody() {return mody;}
+    public int getModY() {return mody;}
 
     public int getXY(){return (locx*1000)+locy;}
     public char getOpponent(){
@@ -47,18 +47,18 @@ abstract class Piece {
 class Pawn extends Piece{
     private boolean firstMove = true;
     public Pawn(int locx, int locy, boolean color){
-        super(locx,locy,"P", color);
+        super(locx,locy, 'P', color);
     }
     public ArrayList<Integer> getMoves(){
         ArrayList<Integer> moves = new ArrayList<>();
         
-        if (!Board.occupiedByParty(this.getX(), this.getY() + (1*this.getModY()), 'A'))    {moves.add(Board.quickFormat(this.getX,this.getY + (1*this.getModY)));}
+        if (!Board.occupiedByParty(this.getX(), this.getY() + (1*this.getModY()), 'A'))    {moves.add(Board.quickFormat(this.getX(),this.getY() + (1*this.getModY())));}
         
-        if (!Board.occupiedByParty(this.getX(), this.getY() + (2*this.getModY()), 'A')&&firstMove){moves.add(Board.quickFormat(this.getX,this.getY + (2*this.getModY)));}
+        if (!Board.occupiedByParty(this.getX(), this.getY() + (2*this.getModY()), 'A')&&firstMove){moves.add(Board.quickFormat(this.getX(),this.getY() + (2*this.getModY())));}
         
-        if (!Board.occupiedByParty(this.getX() + 1, this.getY() + (1*this.getModY()), getOpponent())) {moves.add(Board.quickFormat(this.getX + 1,this.getY + (this.getModY)));}
+        if (!Board.occupiedByParty(this.getX() + 1, this.getY() + (1*this.getModY()), getOpponent())) {moves.add(Board.quickFormat(this.getX() + 1,this.getY() + (this.getModY())));}
         
-        if (!Board.occupiedByParty(this.getX() - 1, this.getY() + (1*this.getModY()), getOpponent())) {moves.add(Board.quickFormat(this.getX - 1,this.getY + (this.getModY)));}
+        if (!Board.occupiedByParty(this.getX() - 1, this.getY() + (1*this.getModY()), getOpponent())) {moves.add(Board.quickFormat(this.getX() - 1,this.getY() + (this.getModY())));}
 
         return moves;
     }
@@ -67,7 +67,7 @@ class Pawn extends Piece{
 
 class Knight extends Piece{
     public Knight(int locx, int locy, boolean color){
-        super(locx, locy,"N", color);
+        super(locx, locy, 'N', color);
     }
     public ArrayList<Integer> getMoves(){
         ArrayList<Integer> moves = new ArrayList<>();
@@ -78,14 +78,14 @@ class Knight extends Piece{
 
 class King extends Piece{
     public King(int locx, int locy, boolean color){
-        super(locx,locy,"K", color);
+        super(locx,locy, 'K', color);
     }
 
     public ArrayList<Integer> getMoves(){
         ArrayList<Integer> moves = new ArrayList<>();
-        for (int i = this.getX() - 1, i <= this.getX() + 1; i++){
-            for (int j = this.getY() -1, j <= this.getY() + 1; i++){
-                if (this.getX()!=i && this.getY()!=j && !Board.occupiedByParty(i,j,this.getColor())){moves.add(Board.quickformat(i,j);}
+        for (int i = this.getX() - 1; i <= this.getX() + 1; i++){
+            for (int j = this.getY() -1; j <= this.getY() + 1; i++){
+                if (this.getX()!=i && this.getY()!=j && !Board.occupiedByParty(i,j,this.getColor())){moves.add(Board.quickFormat(i,j));}
             }
         }
         return moves;
@@ -94,7 +94,7 @@ class King extends Piece{
 }
 class Queen extends Piece{
     public Queen(int locx, int locy, boolean color){
-        super(locx,locy,"Q",color);
+        super(locx,locy, 'Q',color);
 
     }
 
@@ -114,23 +114,86 @@ class Queen extends Piece{
 }
 class Bishop extends Piece{
     public Bishop(int locx, int locy, boolean color){
-        super(locx, locy, "B",color);        
+        super(locx, locy, 'B',color);
     }
 
     public ArrayList<Integer> getMoves(){
         ArrayList<Integer> moves = new ArrayList<>();
+        
+
+        int[][] moveMods = {{1,1},{1,-1},{-1,1},{-1,-1}};
+        boolean[] moveFlags = {true,true,true,true};
+
+        for (int i = 1; i < 8; i++){
+            for (int j = 0; j < 4;j++){
+                int tempX = this.getX() + i*moveMods[j][0];
+                int tempY = this.getY() + i*moveMods[j][1];
+                if (moveFlags[j]){
+                    if (!Board.occupiedByParty(tempX,tempY, this.getColor())){moveFlags[j] = false;break;}
+                    if (Board.isOnBoard(tempX)){moves.add(Board.quickFormat(tempX,tempY));}
+                    else{moveFlags[j] = false;break;}
+                    if (Board.occupiedByParty(tempX,tempY,this.getOpponent())){moveFlags[j] = false;break;}
+                }
+
+            }
 
 
+        }
+
+
+
+
+        return moves;
     }
 
 }
 class Rook extends Piece{
     public Rook(int locx, int locy, boolean color){
-        super(locx,locy,"R",color);
+        super(locx,locy, 'R',color);
     }
     public ArrayList<Integer> getMoves(){
         ArrayList<Integer> moves = new ArrayList<>();
+        //I don't know of any better way to do this that won't be more complicated. Check horizontal and vertical positive and negative squares and break once you meet another piece. Could make a function that takes the row or collumn and takes the minimum and maximum values where pieces exist but will be too complicated
+        //I can make a function that takes in two variables and a modifier and is able to calculate it that way much more concise, I know I should do It now but I just want to see if the code works before optimizing it. It would have a stationary value and one that changes depending on the modifier, that being + or -
+        for (int i = 1; i < 8;i++){//Check positions left of piece
         
+            int tempX = this.getX()-i;
+            int tempY = this.getY();
+            if (!Board.occupiedByParty(tempX,tempY,this.getColor())){break;}
+            if (Board.isOnBoard(tempX)){moves.add(Board.quickFormat(tempX,tempY));}
+            else{break;}
+            if (Board.occupiedByParty(tempX, tempY, this.getOpponent())){break;}
+        }
+        for (int i = 1; i < 8;i++){//Check positions right of piece
+            int tempX = this.getX()+i;
+            int tempY = this.getY();
+            if (!Board.occupiedByParty(tempX,tempY,this.getColor())){break;}
+            if (Board.isOnBoard(tempX)){moves.add(Board.quickFormat(tempX,tempY));}
+            else{break;}
+            if (Board.occupiedByParty(tempX, tempY, this.getOpponent())){break;}
+        }
+        for (int i = 1; i < 8; i++){//check positions below piece
+            int tempX = this.getX();
+            int tempY = this.getY()-i;
+            if (!Board.occupiedByParty(tempX, tempY, this.getColor())){break;}
+            if (Board.isOnBoard(tempY)){moves.add(Board.quickFormat(tempX, tempY));}
+            else{break;}
+            if (Board.occupiedByParty(tempX, tempY, this.getOpponent())){break;}
+
+        }
+        for (int i = 1; i < 8; i++){//check positions above piece
+            int tempX = this.getX();
+            int tempY = this.getY()+i;
+            if (!Board.occupiedByParty(tempX, tempY, this.getColor())){break;}
+            if (Board.isOnBoard(tempY)){moves.add(Board.quickFormat(tempX,tempY));}
+            else{break;}
+            if (Board.occupiedByParty(tempX, tempY, this.getOpponent())){break;}
+
+
+        }
+
+        return moves;
+
 
     }
 }
@@ -172,4 +235,6 @@ class Board{
 
     }
     public static int quickFormat(int X, int Y){return (X*1000)+Y;}//this is the same function as getXY from pieces by applying to any coordinates
+    public static boolean isOnBoard(int x){if (x>=0 && x<=7){return true;}return false;}
+    public static boolean isOnBoard(int x, int y){if (x>=0 && x<=7 && y>=0 && y<=7){return true;}return false;}
 }
