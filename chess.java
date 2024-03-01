@@ -99,16 +99,57 @@ class Queen extends Piece{
     }
 
     public ArrayList<Integer> getMoves(){//shouldn't go through pieces, shouldn't go outside boundaries
-        ArrayList<Integer> moves = new ArrayList<>();
-        boolean[] flags = new boolean[2];
-        int y = this.getY();
-        int x = this.getX();  
-        for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < 2; j++){
-                if (!flags[j] && !Board.occupiedByParty(i+x,y,'A')){moves.}
+        
 
+        int[][] moveMods = {{1,1},{1,-1},{-1,1},{-1,-1}};
+        boolean[] moveFlags = {true,true,true,true};
+
+        for (int i = 1; i < 8; i++){
+            for (int j = 0; j < 4;j++){
+                int tempX = this.getX() + i*moveMods[j][0];
+                int tempY = this.getY() + i*moveMods[j][1];
+                if (moveFlags[j]){
+                    if (!Board.occupiedByParty(tempX,tempY, this.getColor())){moveFlags[j] = false;break;}
+                    if (Board.isOnBoard(tempX)){moves.add(Board.quickFormat(tempX,tempY));}
+                    else{moveFlags[j] = false;break;}
+                    if (Board.occupiedByParty(tempX,tempY,this.getOpponent())){moveFlags[j] = false;break;}
+                }
             }
         }
+
+
+
+
+
+
+        int x = this.getX();
+        int y = this.getY();
+
+        moves.addAll(getMovesSubsidiary(x,y,0,-1));
+        moves.addAll(getMovesSubsidiary(x,y,0,+1));
+        moves.addAll(getMovesSubsidiary(x,y,-1,0));
+        moves.addAll(getMovesSubsidiary(x,y,+1,0));
+
+
+
+        return moves;
+        }
+    public ArrayList<Integer> getMovesSubsidiary(int X,int Y,int incrementX,int incrementY){
+        ArrayList<Integer> moves = new ArrayList<>();
+
+
+        for (int i = 1; i < 8; i ++){
+            X+=incrementX;
+            Y+=incrementY;
+            if (!Board.occupiedByParty(X,Y,this.getColor())){break;}
+            if (Board.isOnBoard(X,Y)){moves.add(Board.quickFormat(X,Y);}
+            else{break;}
+            if (Board.occupiedByParty(X,Y,this.getOpponent())){break;}
+
+        }
+        return moves;
+}
+
 
     }
 }
@@ -155,47 +196,36 @@ class Rook extends Piece{
         ArrayList<Integer> moves = new ArrayList<>();
         //I don't know of any better way to do this that won't be more complicated. Check horizontal and vertical positive and negative squares and break once you meet another piece. Could make a function that takes the row or collumn and takes the minimum and maximum values where pieces exist but will be too complicated
         //I can make a function that takes in two variables and a modifier and is able to calculate it that way much more concise, I know I should do It now but I just want to see if the code works before optimizing it. It would have a stationary value and one that changes depending on the modifier, that being + or -
-        for (int i = 1; i < 8;i++){//Check positions left of piece
         
-            int tempX = this.getX()-i;
-            int tempY = this.getY();
-            if (!Board.occupiedByParty(tempX,tempY,this.getColor())){break;}
-            if (Board.isOnBoard(tempX)){moves.add(Board.quickFormat(tempX,tempY));}
-            else{break;}
-            if (Board.occupiedByParty(tempX, tempY, this.getOpponent())){break;}
-        }
-        for (int i = 1; i < 8;i++){//Check positions right of piece
-            int tempX = this.getX()+i;
-            int tempY = this.getY();
-            if (!Board.occupiedByParty(tempX,tempY,this.getColor())){break;}
-            if (Board.isOnBoard(tempX)){moves.add(Board.quickFormat(tempX,tempY));}
-            else{break;}
-            if (Board.occupiedByParty(tempX, tempY, this.getOpponent())){break;}
-        }
-        for (int i = 1; i < 8; i++){//check positions below piece
-            int tempX = this.getX();
-            int tempY = this.getY()-i;
-            if (!Board.occupiedByParty(tempX, tempY, this.getColor())){break;}
-            if (Board.isOnBoard(tempY)){moves.add(Board.quickFormat(tempX, tempY));}
-            else{break;}
-            if (Board.occupiedByParty(tempX, tempY, this.getOpponent())){break;}
+        int x = this.getX();
+        int y = this.getY();
 
-        }
-        for (int i = 1; i < 8; i++){//check positions above piece
-            int tempX = this.getX();
-            int tempY = this.getY()+i;
-            if (!Board.occupiedByParty(tempX, tempY, this.getColor())){break;}
-            if (Board.isOnBoard(tempY)){moves.add(Board.quickFormat(tempX,tempY));}
-            else{break;}
-            if (Board.occupiedByParty(tempX, tempY, this.getOpponent())){break;}
+        moves.addAll(getMovesSubsidiary(x,y,0,-1));
+        moves.addAll(getMovesSubsidiary(x,y,0,+1));
+        moves.addAll(getMovesSubsidiary(x,y,-1,0));
+        moves.addAll(getMovesSubsidiary(x,y,+1,0));
 
 
-        }
 
         return moves;
 
 
     }
+
+    public ArrayList<Integer> getMovesSubsidiary(int X,int Y,int incrementX,int incrementY){
+        ArrayList<Integer> moves = new ArrayList<>();
+
+
+        for (int i = 1; i < 8; i ++){
+            X+=incrementX;
+            Y+=incrementY;
+            if (!Board.occupiedByParty(X,Y,this.getColor())){break;}
+            if (Board.isOnBoard(X,Y)){moves.add(Board.quickFormat(X,Y);}
+            else{break;}
+            if (Board.occupiedByParty(X,Y,this.getOpponent())){break;}
+
+        }
+        return moves;
 }
 
 
