@@ -8,16 +8,16 @@ class chess {
     public static boolean gameActive = true;
 
     public static void main(String[] args) {
-        System.out.println("TEST");
-        Queen queen = new Queen(4,4,true);
-        System.out.println(queen.getMoves());
+        GameLoop();
     }
 
     public static void GameLoop(){
         Scanner scanner = new Scanner(System.in);
         int decodedMove;
-        char currentColor = 'W';
+        currentColor = 'W';
+        Board.initializeBoardNormal();
         while (gameActive){
+            Board.drawBoard();
             System.out.println("Make your move");
             decodedMove = Board.decodeMove(scanner.nextLine());
             if (matchMove(decodedMove)){
@@ -43,7 +43,34 @@ class chess {
     public static boolean matchMove(int move){
         int[] sae = Board.findStartAndEnd(currentColor);
         for (int i = sae[0]; i < sae[1]; i++){
-            ArrayList<Integer> moves = Board.piecePositions[i].getMoves();
+            Piece piece = Board.piecePositions[i];
+            switch (piece.getRank()) {
+              case 'P':
+                piece = (Pawn) piece;
+                break;
+              case 'K':
+                piece = (King) piece;
+                break;
+              case 'N':
+                piece = (Knight) piece;
+                break;
+              case 'Q':
+                piece = (Queen) piece;
+                break;
+              case 'R':
+                  piece = (Rook) piece;
+                  break;
+              case 'B':
+                  piece = (Bishop) piece;
+                  break;
+              default:
+                  System.out.println("Something broke");
+                  break;
+
+            }
+            
+            ArrayList<Integer> moves = piece.getMoves();
+            System.out.println(moves);
             for (int tempMove: moves){
                 if (tempMove == move){
                     currentPiece = Board.piecePositions[i];
@@ -52,6 +79,7 @@ class chess {
                 }
 
             }
+            System.out.println("move was not possible");
         }
         return (false);
 
@@ -77,8 +105,8 @@ abstract class Piece {
         this.color = color;
         this.pieceID = ID;
         ID++;
-        if (this.color == true){this.modx = 1; this.mody = -1;}
-        else {this.modx = -1; this.mody = 1;}
+        if (this.color == true){this.modx = -1; this.mody = 1;}
+        else {this.modx = 1; this.mody = -1;}
     }
 
 
@@ -116,13 +144,13 @@ class Pawn extends Piece{
         int x = this.getX();
         int y = this.getY();
 
-        if (!Board.occupiedByParty(x, y + (1*this.getModY()), 'A') && Board.isOnBoard(x,y+this.getModY())){moves.add(Board.quickFormat(x,y + (1*this.getModY())));}
+        if (!Board.occupiedByParty(x, y + (this.getModY()), 'A') && Board.isOnBoard(x,y+this.getModY())){moves.add(Board.quickFormat(x,y + (this.getModY())));}
         
-        if (!Board.occupiedByParty(x, y + (2*this.getModY()), 'A')&& Board.isOnBoard(x,y+(2*this.getModY())) && firstMove){moves.add(Board.quickFormat(x,y + (2*this.getModY())));}
+        if (!Board.occupiedByParty(x, y + (2*this.getModY()), 'A') && Board.isOnBoard(x,y+(2*this.getModY())) && firstMove){moves.add(Board.quickFormat(x,y + (2*this.getModY())));}
         
-        if (!Board.occupiedByParty(x + 1, y + (1*this.getModY()), getOpponent()) && Board.isOnBoard(x+1,y + this.getModY())) {moves.add(Board.quickFormat(x + 1,y + (this.getModY())));}
+        if (Board.occupiedByParty(x + 1, y + (this.getModY()), getOpponent()) && Board.isOnBoard(x+1,y + this.getModY())) {moves.add(Board.quickFormat(x + 1,y + (this.getModY())));}
         
-        if (!Board.occupiedByParty(x - 1, y + (1*this.getModY()), getOpponent()) && Board.isOnBoard(x-1,y+this.getModY())) {moves.add(Board.quickFormat(x - 1,y + (this.getModY())));}
+        if (Board.occupiedByParty(x - 1, y + (this.getModY()), getOpponent()) && Board.isOnBoard(x-1,y+this.getModY())) {moves.add(Board.quickFormat(x - 1,y + (this.getModY())));}
 
         return moves;
     }
@@ -158,7 +186,7 @@ class King extends Piece{
     public ArrayList<Integer> getMoves(){
         ArrayList<Integer> moves = new ArrayList<>();
         for (int i = this.getX() - 1; i <= this.getX() + 1; i++){
-            for (int j = this.getY() -1; j <= this.getY() + 1; i++){
+            for (int j = this.getY() -1; j <= this.getY() + 1; j++){
                 if (this.getX()!=i && this.getY()!=j && !Board.occupiedByParty(i,j,this.getColor()) && Board.isOnBoard(i,j)){moves.add(Board.quickFormat(i,j));}
             }
         }
@@ -324,9 +352,29 @@ class Rook extends Piece {
 
 }
 class Board{
-    public static Piece[][] board = new Piece[8][8];//I don't think this will do anything. Keeping it for possible future use, should delete if not
     public static Piece[] piecePositions = new Piece[32];//Keep all pieces depending on ID. Blacks should be in the back (x>15). And yes, th                                                                              //at is a reference to segregation in america
 
+    public static void initializeBoardNormal(){
+      initializeColorNormal(1,0,true,4,3);
+      initializeColorNormal(6,7,false,3,4);
+
+    }
+    public static void initializeColorNormal(int pawnPosition, int otherPosition, boolean flag, int kingx, int queenx){
+      for (int i = 0; i < 8; i++){
+        piecePositions[Piece.ID] =  new Pawn(i,pawnPosition,flag);
+      }
+      piecePositions[Piece.ID] =  new Rook(0,otherPosition,flag);
+      piecePositions[Piece.ID] =  new Rook(7,otherPosition,flag);
+
+      piecePositions[Piece.ID] =  new Knight(1,otherPosition,flag);
+      piecePositions[Piece.ID] =  new Knight(6,otherPosition,flag);
+
+      piecePositions[Piece.ID] =  new Bishop(2,otherPosition,flag);
+      piecePositions[Piece.ID] =  new Bishop(5,otherPosition,flag);
+
+      piecePositions[Piece.ID] =  new Queen(queenx,otherPosition,flag);
+      piecePositions[Piece.ID] =  new King(kingx,otherPosition,flag);
+    }
 
     public static boolean occupiedByParty(int X, int Y, char party/*party should be A for (A)ll, "B" for (B)lack and "W" for (W)hite*/){
         int endPosition = quickFormat(X,Y);
@@ -376,7 +424,9 @@ class Board{
 
     public static int decodeMove(String move){
         char charx = move.charAt(0);
+        charx = Character.toUpperCase(charx);
         int y = Character.getNumericValue(move.charAt(1));
+        y--;
         int x = Character.getNumericValue(charx-17);
         if (isOnBoard(x,y)){return quickFormat(x,y);}
         else{return 999;}
@@ -396,6 +446,33 @@ class Board{
         }
 
 
+    }
+    public static void drawBoard(){
+        char[][] board = new char[8][8];
+
+        for (int i = 0; i < 32; i++){
+            if(piecePositions[i]!=null){
+                int x = piecePositions[i].getX();
+                int y = piecePositions[i].getY();
+                board[x][y] = piecePositions[i].getRank();
+            }
+
+        }
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                if (board[i][j] == '\u0000'){board[i][j] = 'O';}
+
+
+            }
+
+
+        }
+        for (int i = 7; i > -1 ; i--){
+            for (int j = 0; j < 8; j++){
+                System.out.print(board[j][i]);
+            }
+            System.out.println();
+        }
     }
 
     public static int quickFormat(int X, int Y){return (X*1000)+Y;}//this is the same function as getXY from pieces by applying to any coordinates
