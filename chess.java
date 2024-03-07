@@ -70,18 +70,30 @@ class chess {
             }
             
             ArrayList<Integer> moves = piece.getMoves();
-            System.out.println(moves);
             for (int tempMove: moves){
-                if (tempMove == move){
+                if (tempMove == move && judgePosition(piece.getXY()) && judgeRank(piece.getRank())){
                     currentPiece = Board.piecePositions[i];
                     return (true);
 
                 }
 
             }
-            System.out.println("move was not possible");
+            System.out.println("Move not possible, try again");
         }
         return (false);
+
+
+    }
+
+    public static boolean judgePosition(int piecePosition){
+        if (Board.positionFilter == -1){return true;}
+        if (Board.positionFilter == piecePosition){return true;}
+        return false;
+    }
+    public static boolean judgeRank(char pieceRank){
+        if (Board.rankFilter == 'X'){return true;}
+        if (Board.rankFilter == pieceRank){return true;}
+        return false;
 
 
     }
@@ -353,11 +365,12 @@ class Rook extends Piece {
 }
 class Board{
     public static Piece[] piecePositions = new Piece[32];//Keep all pieces depending on ID. Blacks should be in the back (x>15). And yes, th                                                                              //at is a reference to segregation in america
-
+    public static char rankFilter;
+    public static int positionFilter;
     public static void initializeBoardNormal(){
       initializeColorNormal(1,0,true,4,3);
       initializeColorNormal(6,7,false,3,4);
-
+      
     }
     public static void initializeColorNormal(int pawnPosition, int otherPosition, boolean flag, int kingx, int queenx){
       for (int i = 0; i < 8; i++){
@@ -421,8 +434,27 @@ class Board{
 
 
     }
-
     public static int decodeMove(String move){
+        int length = move.length();
+        int decodedMove;
+        switch (length) {
+            case 2:
+                return(decodeMoveUnfiltered(move));
+            case 3:
+                return(decodeMoveRank(move));
+            case 4:
+                return(decodeMovePosition(move));
+            default:
+                System.out.println("Something went wrong");
+                return 999;
+        }
+    }
+
+
+
+    public static int decodeMoveUnfiltered(String move){
+        rankFilter = 'X';
+        positionFilter = -1;
         char charx = move.charAt(0);
         charx = Character.toUpperCase(charx);
         int y = Character.getNumericValue(move.charAt(1));
@@ -430,6 +462,41 @@ class Board{
         int x = Character.getNumericValue(charx-17);
         if (isOnBoard(x,y)){return quickFormat(x,y);}
         else{return 999;}
+
+
+    }
+
+    public static int decodeMoveRank(String move){
+        rankFilter = move.charAt(0);
+        positionFilter = -1;
+        char charx = move.charAt(1);
+        charx = Character.toUpperCase(charx);
+        int y = Character.getNumericValue(move.charAt(2));
+        y--;
+        int x = Character.getNumericValue(charx - 17);
+        if (isOnBoard(x,y)){return quickFormat(x,y);}
+        else{return 999;}
+
+        
+
+
+    }
+
+    public static int decodeMovePosition(String move){
+        rankFilter = 'X';
+        String temp = move.substring(0,2);
+        positionFilter = decodeMove(temp);
+        System.out.println(positionFilter);
+        char charx = move.charAt(2);
+        charx = Character.toUpperCase(charx);
+        int y = Character.getNumericValue(move.charAt(3));
+        y--;
+        int x = Character.getNumericValue(charx - 17);
+        if (isOnBoard(x,y)){return quickFormat(x,y);}
+        else{return 999;}
+
+
+
 
 
     }
