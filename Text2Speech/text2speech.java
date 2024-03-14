@@ -1,10 +1,12 @@
+package Text2Speech;
+
 import java.io.*;
 import javax.sound.sampled.*;
 import java.util.Locale;
 import java.util.Scanner;
 
 class text2speech {
-  public final static String path2folder = "C:\\Users\\Dimitris T\\Documents\\Audacity";
+  public final static String path2folder = "C:\\Users\\Dimitris T\\Desktop\\Projects\\StandaloneProjects\\Text2Speech\\Files";
 
   public static void main(String[] args) {
     Scanner scanner = new Scanner(System.in);
