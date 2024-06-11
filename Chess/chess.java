@@ -104,9 +104,10 @@ class chessMechanics{
                     }
 
                 }
-                System.out.println("Move not possible, try again");
             }
         }
+        System.out.println("Move not possible, try again");
+
         return (false);
 
 
